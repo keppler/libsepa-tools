@@ -92,6 +92,7 @@ foreach my $stmt (@$stmts) {
     # check if record already exists:
     $sql = "SELECT STMT_ID FROM STATEMENTS WHERE "
         . join(' AND ', map { defined($data{$_}) ? "$_=" . $dbh->quote($data{$_}) : "$_ IS NULL" } keys %data);
+    utf8::encode($sql);
 #    print "SQL: $sql\n";
     unless (($sth = $dbh->prepare($sql)) && $sth->execute) {
       die "Error while querying database: $DBI::errstr\n";
@@ -103,12 +104,12 @@ foreach my $stmt (@$stmts) {
     }
 
     $sth->finish;
-    print "SQL: $sql\n";
 
     # insert into database
     $sql = "INSERT INTO STATEMENTS (" . join(', ', keys %data) . ") VALUES ("
         . join(', ', map { defined($data{$_}) ? $dbh->quote($data{$_}) : 'NULL' } keys %data) . ")";
-    print "SQL: $sql\n\n";
+    utf8::encode($sql);
+#    print "SQL: $sql\n\n";
     unless ($dbh->do($sql)) {
       die "Error while adding record: $DBI::errstr\n";
     }
