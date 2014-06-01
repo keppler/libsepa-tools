@@ -36,8 +36,6 @@ if ($#ARGV != 0) {
 
 my $filename = $ARGV[0];
 
-open(my $fh, "< $filename") or die "$0: Can't open $filename: $!\n";
-
 my ($dbh);
 # try to connect to the database
 unless ($dbh = DBI->connect("DBI:mysql:$CONFIG{'DBNAME'}:$CONFIG{'DBHOST'}", $CONFIG{'DBUSER'}, $CONFIG{'DBPASS'})) {
@@ -47,8 +45,6 @@ $dbh->do("SET NAMES 'utf8'");
 
 my $parser = new SEPA::StatementParser();
 $parser->load(SEPA::StatementParser::SEPA_STMT_FORMAT_MT940, $filename);
-
-close($fh);
 
 my $stmts = $parser->getStatements();
 my $count_parsed = 0;
@@ -71,6 +67,9 @@ foreach my $stmt (@$stmts) {
         'STMT_REF'        => $$tx{ref},       # reference for the account owner 
         'STMT_BANKREF'    => $$tx{bankref},   # bank reference
         'STMT_GVC'        => $$tx{gvc},       # business code (payment type)
+        'STMT_EXTCODE'    => $$tx{extcode},   # extended SEPA code
+        'STMT_TXTEXT'     => $$tx{txtext},    # transaction text / description
+        'STMT_PRIMANOTA'  => $$tx{primanota}, # primanota
         'STMT_BANK'       => $$tx{bank},      # counterparty bank code or BIC
         'STMT_ACCOUNT'    => $$tx{account},   # counterparty account number or IBAN
         'STMT_NAME'       => $$tx{name},      # counterparty name
